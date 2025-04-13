@@ -1,0 +1,12 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: NMEA2000_Windows_Can07",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/NMEA2000_Windows_Can07.py",
+      "console": "integratedTerminal"
+    }
+  ]
+}

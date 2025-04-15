@@ -94,34 +94,34 @@ pgn_definitions = {
 	    {"name": "Minimum Discharge (SOC)",             "type": "byte", "signed": False, "operation": lambda x: x * 0.5,    "unit": "%"},
         ],
     127506: [
-        {"name": "Sequence ID",     "type": "byte", "signed": False, "operation": lambda x: x * 1,      "unit": "bit"},
-        {"name": "DC Instance",     "type": "byte", "signed": False, "operation": lambda x: x * 1,      "unit": "bit"},
-        {"name": "DC Type",         "type": "byte", "signed": False, "operation": lambda x: x * 1,      "unit": "Number"},
-        {"name": "State of Charge", "type": "byte", "signed": False, "operation": lambda x: x * 1,      "unit": "%"},
-	    {"name": "State of Health", "type": "word", "signed": False, "operation": lambda x: x * 1,      "unit": "%"},
-        {"name": "Time Remaining",  "type": "word", "signed": False,"operation": lambda x: x * 0.01,   "unit": "Kelvin"},
-        {"name": "Ripple Voltage",  "type": "word", "signed": False,"operation": lambda x: x * 1,      "unit": "mV"},
-        {"name": "Amp Hours",       "type": "word", "signed": False,"operation": lambda x: x * 3600,   "unit": "Coulombs"},
+        {"name": "Sequence ID",     "type": "byte", "signed": False, "operation": lambda x: x,          "unit": "bit"},
+        {"name": "DC Instance",     "type": "byte", "signed": False, "operation": lambda x: x,          "unit": "bit"},
+        {"name": "DC Type",         "type": "byte", "signed": False, "operation": lambda x: x,          "unit": "Number"},
+        {"name": "State of Charge", "type": "byte", "signed": False, "operation": lambda x: x,          "unit": "%"},
+	    {"name": "State of Health", "type": "word", "signed": False, "operation": lambda x: x,          "unit": "%"},
+        {"name": "Time Remaining",  "type": "word", "signed": False,"operation": lambda x: x * 0.01,    "unit": "Kelvin"},
+        {"name": "Ripple Voltage",  "type": "word", "signed": False,"operation": lambda x: x,           "unit": "mV"},
+        {"name": "Amp Hours",       "type": "word", "signed": False,"operation": lambda x: x * 3600,    "unit": "Coulombs"},
         ],
     127508: [
-        {"name": "Battery Instance",    "type": "byte", "signed": False, "operation": lambda x: x * 1,      "unit": "Number"},
+        {"name": "Battery Instance",    "type": "byte", "signed": False, "operation": lambda x: x,          "unit": "Number"},
         {"name": "Battery Voltage",     "type": "word", "signed": True,  "operation": lambda x: x * 0.01,   "unit": "Volt"},
         {"name": "Battery Current",     "type": "word", "signed": True,  "operation": lambda x: x * 0.1,    "unit": "Amp"},
         {"name": "Battery Case Temp.",  "type": "word", "signed": False, "operation": lambda x: x * 0.01,   "unit": "Kelvin"},
-	    {"name": "Sequence ID",         "type": "byte", "signed": False, "operation": lambda x: x * 1,      "unit": ""},
+	    {"name": "Sequence ID",         "type": "byte", "signed": False, "operation": lambda x: x,          "unit": ""},
         ],
     127513: [
-        {"name": "Battery Instance",                    "type": "byte", "signed": False, "operation": lambda x: x * 1,      "unit": "Number"},
-        {"name": "Batt.Type Equalisation + NMEA res.",  "type": "byte", "signed": False, "operation": lambda x: x * 1,      "unit": "bit"},
+        {"name": "Battery Instance",                    "type": "byte", "signed": False, "operation": lambda x: x,          "unit": "Number"},
+        {"name": "Batt.Type Equalisation + NMEA res.",  "type": "byte", "signed": False, "operation": lambda x: x,          "unit": "bit"},
 	    {"name": "Nom Voltage + Batt Chemistry",        "type": "byte", "signed": False, "operation": lambda x: x * 0.01,   "unit": "bit"},
         {"name": "Battery Capacity",                    "type": "word", "signed": False, "operation": lambda x: x * 3600,   "unit": "Coulombs"},
-	    {"name": "Battery Temp. Coeff.t",               "type": "byte", "signed": True,  "operation": lambda x: x * 1,      "unit": "%"},
+	    {"name": "Battery Temp. Coeff.t",               "type": "byte", "signed": True,  "operation": lambda x: x,          "unit": "%"},
         {"name": "Peukert Exponent",                    "type": "byte", "signed": False, "operation": lambda x: x * 0.002,  "unit": ""},
-        {"name": "Charge Eff. Factor",                  "type": "byte", "signed": True,  "operation": lambda x: x * 1,      "unit": "%"},
+        {"name": "Charge Eff. Factor",                  "type": "byte", "signed": True,  "operation": lambda x: x,          "unit": "%"},
         ],
     128002: [
-        {"name": "Inverter/Motor Controller",   "type": "byte", "signed": False, "operation": lambda x: x * 1,         "unit": "Number"},
-        {"name": "Active mode + BrakeMode",     "type": "byte", "signed": False, "operation": lambda x: x * 1,         "unit": "bits"},
+        {"name": "Inverter/Motor Controller",   "type": "byte", "signed": False, "operation": lambda x: x,             "unit": "Number"},
+        {"name": "Active mode + BrakeMode",     "type": "byte", "signed": False, "operation": lambda x: x,             "unit": "bits"},
 	    {"name": "Rotational Shaft Speed",      "type": "word", "signed": False,  "operation": lambda x: x * 0.25,     "unit": "RPM"},
         {"name": "Motor DC Voltage",            "type": "word", "signed": False, "operation": lambda x: x * 0.1,       "unit": "Volt"},
         {"name": "Motor DC Current",            "type": "word", "signed": True,  "operation": lambda x: x * 0.1,       "unit": "Amp"},
@@ -139,6 +139,9 @@ pgn_definitions = {
         {"name": "Reserved",            "type": "word",     "signed": False,    "operation": lambda x: x,        "unit": "Number"}
         ]
 }
+
+pgn_buffer = bytearray()
+
 # Opslag voor actuele PGN-data
 pgn_data = {}
 
@@ -147,6 +150,12 @@ def extract_pgn(arbitration_id):
     Extraheer de PGN van het CAN arbitration ID.
     """
     return (arbitration_id >> 8) & 0x01FFFF  # PGN bevindt zich in bits 8-25
+
+def calculated_len(pgn):
+    length = 0
+    for field in pgn_definitions[pgn]:
+        length += {"byte": 1, "word": 2, "double": 4}[field["type"]]
+    return length
 
 def process_pgn_data(pgn, data):
     """
@@ -205,14 +214,39 @@ def main():
 
     # Lees en decodeer CAN-berichten
     try:
+        expected_length = -1
         start_time = time.time()
         message = bus.recv(1)  # Sync
         while True:
             message = bus.recv(1)  # Wacht maximaal 1 seconde op een bericht
             if message:
                 pgn = extract_pgn(message.arbitration_id)
-                decoded_fields = process_pgn_data(pgn, message.data)
-                pgn_data[pgn] = decoded_fields  # Sla de meest recente gegevens op
+
+
+                # Controleer of de PGN een fast-packet bericht is
+                sequence_counter = (message.data[0] >> 5) & 0b111  # Extract low nibble
+                frame_counter = message.data[0] & 0b11111  # Extract low nibble
+                if message.is_extended_id and frame_counter == 0:
+                    # Dit is het begin van een fast-packet bericht
+                    pgn_buffer.clear()  # Wis de buffer voor dit PGN
+                    pgn_buffer.extend(message.data[2:])  # Voeg data toe aan buffer
+                    expected_length = message.data[1]  # Lengte van het volledige bericht
+                elif message.is_extended_id and expected_length > 0:
+                    # Dit is een vervolg van een bestaand fast-packet bericht
+                    pgn_buffer.extend(message.data[1:])  # Voeg data toe aan buffer
+                else:
+                    # Dit is een standaard (niet-fast-packet) bericht
+                    pgn_buffer.clear()
+                    pgn_buffer.extend(message.data)
+                    expected_length = 8  # Standaard CAN-berichtlengte
+
+                actual_length=len(pgn_buffer)
+                calculated_length = calculated_len(pgn)
+                if expected_length > 0 and actual_length >= expected_length and expected_length == calculated_length:
+                    decoded_fields = process_pgn_data(pgn, pgn_buffer)
+                    pgn_data[pgn] = decoded_fields  # Sla de meest recente gegevens op
+                    pgn_buffer.clear()
+                    expected_length = -1
 
             # Toon de gegevens elke 2 seconden
             if time.time() - start_time >= 1:
